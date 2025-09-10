@@ -1,0 +1,1822 @@
+<!-- MODIFICATIONS TO THIS TOOL WILL RESULT IN YOU LOSING ACCESS IF CAUGHT -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    <title>Blake's Encryptor/Decryptor V4 Testing Build</title>
+    <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@400;700&family=Sedgwick+Ave+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./js/styles.css">
+</head>
+<body>
+    <div id="access-denied" style="display: none;">
+        <!-- dynamically set in code -->
+    </div>
+
+    <div id="special-access-denied" style="display: none;">
+        <!-- dynamically set in code -->
+    </div>
+
+    <div class="container" style="display: none;">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="encryptedCount">0</div>
+                <div class="stat-label">Messages Encrypted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="decryptedCount">0</div>
+                <div class="stat-label">Messages Decrypted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeCount">0</div>
+                <div class="stat-label">Active Messages</div>
+            </div>
+        </div>
+        <div class="header"> <!-- why the fuck does the parenthesis have a bullet point -->
+            <h1>Blake's Encryptor/Decryptor V4 Testing Build <li><span style="font-weight: normal; font: normal;">(NOT FOR EVERYONE YET.)</span></li><h1>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Enter your password" required>
+                <button class="password-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">👁️</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputText">Message</label>
+            <textarea id="inputText" placeholder="Enter your message here or upload a file" required></textarea>
+        </div>
+
+
+        <div class="form-group">
+            <input type="file" id="fileInput" class="file-input" accept="text/plain">
+            <label for="fileInput" class="file-label">📎 Upload Text File</label>
+        </div>
+
+        
+
+        <div class="self-destruct-container">
+            <div class="self-destruct-header">
+                <label for="selfDestructTime">Self-Destruct Time (Optional)</label>
+                <button type="button" class="toggle-quick-set" aria-expanded="false" aria-controls="quickSetOptions">
+                    Quick Set Options
+                </button>
+            </div>
+            <div class="self-destruct-input-group">
+                <input type="datetime-local" id="selfDestructTime" aria-describedby="selfDestructDesc">
+                <p id="selfDestructDesc" class="sr-only">Set a date and time for the message to self-destruct, or use the quick-set options below.</p>
+            </div>
+            <div id="quickSetOptions" class="quick-set-options" role="region" aria-labelledby="quickSetHeading" hidden>
+                <h3 id="quickSetHeading" class="sr-only">Quick Set Options</h3>
+                <div class="quick-set-buttons">
+                    <button type="button" class="quick-set" data-minutes="10">+10 Minutes</button>
+                    <button type="button" class="quick-set" data-minutes="30">+30 Minutes</button>
+                    <button type="button" class="quick-set" data-minutes="60">+1 Hour</button>
+                    <button type="button" class="quick-set" data-minutes="180">+3 Hours</button>
+                    <button type="button" class="quick-set today-btn" data-today="3pm">Today 3PM</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- Auto Self-Destruct Modal -->
+        <div class="modal-overlay" id="autoSelfDestructOverlay" onclick="closeAutoSelfDestruct()"></div>
+        <div class="modal" id="autoSelfDestructModal">
+            <div class="modal-header">
+                <h2>Auto Self-Destruct Settings</h2>
+                <button class="modal-close" onclick="closeAutoSelfDestruct()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="autoSelfDestructForm" onsubmit="saveAutoSelfDestruct(event)">
+                    <div class="form-group">
+                        <label>Enable Auto Self-Destruct</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoSelfDestructToggle" onchange="toggleAutoSelfDestruct()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group" id="timeInputGroup">
+                        <label for="autoSelfDestructTime">Set Default Expiry Time</label>
+                        <input type="time" id="autoSelfDestructTime" name="autoSelfDestructTime" required>
+                        <p class="time-note">Note: Messages will expire at this time daily. If the time has passed, it will be set for tomorrow.</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="encryptBtn" class="button" onclick="onEncryptClick()">🔒 Encrypt</button>
+            <button id="decryptBtn" class="button" onclick="onDecryptClick()">🔓 Decrypt</button>
+            <button class="button btn-danger" onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+
+        <div class="result-container">
+            <div class="input-group">
+                <textarea id="resultText" readonly></textarea>
+                <div class="time-remaining" id="timeRemaining"></div>
+            </div>
+            <div id="selfDestructIndicator" class="self-destruct-indicator"></div>
+        </div>
+
+        <div class="button-group">
+            <button class="button" onclick="copyResult()">📋 Copy</button>
+            <button class="button" onclick="downloadResult()">💾 Save</button>
+        </div>
+    </div>
+
+<!-- Settings Button -->
+<button class="settings-button" onclick="toggleSettings()" aria-label="Open settings">
+    <span class="settings-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l-.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </span>
+</button>
+
+<!-- Redesigned Settings Panel -->
+<div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-panel" id="settingsPanel" onclick="stopPropagation(event)">
+        <div class="settings-header">
+            <h3>Welcome, <span id="settingsUsername"></span></h3>
+            <button class="settings-close" onclick="toggleSettings()">×</button>
+        </div>
+        <div class="settings-content">
+            <div class="settings-search">
+                <input type="text" placeholder="Search settings..." class="settings-search-input" oninput="filterSettings(this.value)">
+                <div class="search-loading" id="searchLoading"></div>
+            </div>
+            <div class="settings-list" id="settingsList">
+                <div class="setting-item" data-name="dark mode">
+                    <span>Dark Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item" data-name="auto-copy result">
+                    <span>Auto-Copy Result</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoCopy">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item" data-name="auto self-destruct">
+                    <span>Auto Self-Destruct</span>
+                    <button class="settings-btn" onclick="openAutoSelfDestruct()">Configure</button>
+                </div>
+                <div class="setting-item" data-name="Extra Settings">
+                    <span>Extra Settings</span>
+                    <button class="settings-btn" onclick="openExtraSettings()">Open</button>
+                </div>
+                <div class="setting-item" data-name="message history">
+                    <span>Message History</span>
+                    <button class="settings-btn" onclick="openHistory()">View</button>
+                </div>
+                <div class="setting-item" data-name="report bug">
+                    <span>Report Bug</span>
+                    <button class="settings-btn" onclick="reportBug()">Report Issue</button>
+                </div>
+                    <div class="setting-item no-hover" data-name="version" style="justify-content: center; pointer-events: none;">
+                        <span style="user-select: none; pointer-events: none;">Version V3.0.4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra Settings Modal -->
+<div class="modal-overlay" id="extraSettingsOverlay" onclick="closeExtraSettings()"></div>
+<div class="modal" id="extraSettingsModal">
+    <div class="modal-header">
+        <h2>Extra Settings</h2>
+        <button class="modal-close" onclick="closeExtraSettings()">×</button>
+    </div>
+    <div class="modal-body">
+        <div class="settings-list">
+            <div class="setting-item" data-name="layout">
+                <span>Page Layout</span>
+                <!--<button class="settings-btn" onclick="openPageLayoutSettings()">Configure</button>-->
+                <div class="setting-item no-hover" data-name="version" style="justify-content: center; pointer-events: none;">
+                    <span style="user-select: none; pointer-events: none;">Coming V3.1</span>
+                </div>
+            </div>
+            <div class="setting-item" data-name="keyboard shortcuts">
+                <span>Keyboard Shortcuts</span>
+                <button class="settings-btn" onclick="openShortcutSettings()">Configure</button>
+            </div>
+            <div class="setting-item" data-name="require password">
+                <span>Require Password</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="requirePassword" onchange="togglePasswordRequirement()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item" data-name="reset data">
+                <span>Reset All Data</span>
+                <button class="settings-btn" onclick="resetAllData()">Reset</button>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page Layout Settings Modal (W.I.P) -->
+<div class="modal-overlay" id="pageLayoutOverlay" onclick="closePageLayoutSettings()"></div>
+<div class="modal" id="pageLayoutModal">
+    <div class="modal-header">
+        <h2>Page Layout Settings</h2>
+        <button class="modal-close" onclick="closePageLayoutSettings()">×</button>
+        <p>This page is still being worked on and will most likely be finished in V3.5.</p>
+    </div>
+</div>
+
+<!-- Updated History Modal -->
+<div class="modal-overlay" id="historyOverlay" onclick="closeHistory()"></div>
+<div class="modal" id="historyModal">
+    <div class="modal-header">
+        <h2>Message History</h2>
+        <button class="modal-close" onclick="closeHistory()">×</button>
+    </div>
+    <div class="modal-body">
+        <div id="historyList" class="settings-list"></div>
+        <button class="btn btn-danger history-btn" onclick="clearHistory()">Clear History</button>
+    </div>
+</div>
+
+    <!-- Bug Report Modal -->
+<div class="modal-overlay" id="bugReportOverlay" onclick="closeBugReport()"></div>
+<div class="modal" id="bugReportModal">
+    <div class="modal-header">
+        <h2>Report an Issue</h2>
+        <button class="modal-close" onclick="closeBugReport()">×</button>
+    </div>
+    <div class="modal-body">
+        <form id="bugReportForm" onsubmit="submitBugReport(event)">
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="bugTitle">Issue Title*</label>
+                    <input type="text" id="bugTitle" name="bugTitle" required placeholder="e.g., 'Encryption fails on large files'" />
+                </div>
+                <div class="form-group">
+                    <label for="bugType">Issue Type*</label>
+                    <select id="bugType" name="bugType" required>
+                        <option value="bug">Bug</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="improvement">Improvement</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="bugDescription">Description*</label>
+                    <textarea id="bugDescription" name="bugDescription" required placeholder="Provide detailed information about the issue, including steps to reproduce, expected behavior, and actual results. Include any error messages or screenshots if applicable."></textarea>
+                </div>
+            </div>
+
+            <div class="form-section attachments-section">
+                <div class="form-group">
+                    <label>Attachments (Optional)</label>
+                    <div class="dropzone" id="fileDropzone">
+                        <input type="file" id="bugFiles" name="bugFiles" multiple accept=".png,.jpg,.pdf,.txt" onchange="handleFileUpload(event)" />
+                        <span class="dropzone-text">Drag and drop files here or click to upload (max 10MB)</span>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit Report</button>
+                <button type="button" class="btn btn-secondary" onclick="closeBugReport()">Cancel</button>
+            </div>
+
+            <div class="form-feedback" id="formFeedback"></div>
+        </form>
+    </div>
+</div>
+
+        <!-- Shortcut Settings Modal -->
+    <div class="modal-overlay" id="shortcutOverlay" onclick="closeShortcutSettings()"></div>
+    <div class="modal" id="shortcutModal">
+        <div class="modal-header">
+            <h2>Keyboard Shortcuts</h2>
+            <button class="modal-close" onclick="closeShortcutSettings()">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="shortcutForm" onsubmit="saveShortcutSettings(event)">
+                <div class="form-group" id="shortcutSettings">
+                    <!-- Shortcuts will be dynamically populated -->
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+                <button type="button" class="btn btn-secondary" onclick="resetShortcuts()">Reset to Default</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="./js/Whitelist.js"></script>
+    <script src="./js/Console.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/MessageService.js"></script>
+    <script src="./js/BugReport.js"></script>  
+    <script src="./js/messageHistory.js"></script>
+    <script src="./js/Encrypt.js"></script>
+    <script src="./js/Decrypt.js"></script>
+
+<script>
+
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const header = section.previousElementSibling;
+    const isActive = header.classList.toggle('active');
+
+    if (isActive) {
+        section.style.display = 'block';
+        header.querySelector('.arrow').textContent = '▲';
+    } else {
+        section.style.display = 'none';
+        header.querySelector('.arrow').textContent = '▼';
+    }
+}
+
+let isPasswordRequired = true;
+
+function ensureMessageServiceReady(actionLabel) {
+    try {
+        if (!window.MessageService) {
+            if (typeof sentryLockMS === 'function') {
+                sentryLockMS('MessageService Missing', { hint: 'Reload the page or set localStorage.messageServiceEndpoint to your /macros/s/.../exec URL' });
+            } else {
+                alert('MessageService is missing. Please reload and configure endpoint.');
+            }
+            return false;
+        }
+        const endpoint = localStorage.getItem('messageServiceEndpoint') || '';
+        if (!endpoint) {
+            if (typeof sentryLockMS === 'function') {
+                sentryLockMS('Missing Endpoint', { hint: 'Set localStorage.messageServiceEndpoint to your deployed Apps Script Web App URL' });
+            } else {
+                alert('Endpoint missing. Set localStorage.messageServiceEndpoint to your Web App URL.');
+            }
+            return false;
+        }
+        return true;
+    } catch (e) {
+        console.error('ensureMessageServiceReady error:', e);
+        return false;
+    }
+}
+
+async function onEncryptClick() {
+    try {
+        await encryptMessage();
+        if (window.MessageService && MessageService.createMessage && window.lastMessageMeta) {
+            const endpoint = localStorage.getItem('messageServiceEndpoint') || 'https://script.google.com/macros/s/AKfycbzGQXAyxv-HowUX-Ulf0-ceZvMbVu8c-jvje982xbxtQOn44i0LqunzcTfT8aHbc-J4TQ/exec';
+            if (endpoint) {
+                MessageService.createMessage(window.lastMessageMeta);
+            } else if (typeof sentryLockMS === 'function') {
+                sentryLockMS('Missing Endpoint', { hint: 'Set localStorage.messageServiceEndpoint to your deployed Apps Script Web App URL' });
+            }
+        }
+    } catch (e) {
+        console.error('onEncryptClick error:', e);
+    }
+}
+
+async function onDecryptClick() {
+    try {
+        await decryptMessage();
+        if (window.MessageService && MessageService.incrementDecryptionCount && window.lastDecryptedId) {
+            const endpoint = localStorage.getItem('messageServiceEndpoint') || 'https://script.google.com/macros/s/AKfycbzGQXAyxv-HowUX-Ulf0-ceZvMbVu8c-jvje982xbxtQOn44i0LqunzcTfT8aHbc-J4TQ/exec';
+            if (endpoint) {
+                MessageService.incrementDecryptionCount(window.lastDecryptedId);
+            } else if (typeof sentryLockMS === 'function') {
+                sentryLockMS('Missing Endpoint', { hint: 'Set localStorage.messageServiceEndpoint to your deployed Apps Script Web App URL' });
+            }
+        }
+    } catch (e) {
+        console.error('onDecryptClick error:', e);
+    }
+}
+
+function checkVer() {
+    const version = localStorage.getItem('version') || '3.0';
+    if (version !== '3.0.4') {
+        showAlert('Please update to the latest version of Blake\'s Encryptor/Decryptor.', 'warning', 1000000);
+
+        //local script to grab current version from github.
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkVer();
+});
+
+function togglePasswordRequirement() {
+    const requirePassword = document.getElementById('requirePassword').checked;
+    isPasswordRequired = requirePassword;
+    const passwordGroup = document.querySelector('.form-group label[for="password"]');
+    const passwordInput = document.getElementById('password');
+    const encryptBtn = document.getElementById('encryptBtn');
+    const decryptBtn = document.getElementById('decryptBtn');
+
+    if (requirePassword) {
+        passwordGroup.style.display = 'block';
+        passwordInput.required = true;
+        passwordInput.placeholder = 'Enter your password';
+        showAlert('Password requirement enabled.', 'success');
+    } else {
+        passwordGroup.style.display = 'none';
+        passwordInput.value = ''; // Clear password
+        passwordInput.required = false;
+        passwordInput.placeholder = 'Password (optional)';
+        showAlert('Password requirement disabled.', 'info');
+    }
+
+    // Update validation in encryptMessage and decryptMessage
+    localStorage.setItem('requirePassword', requirePassword);
+}
+
+// Load saved state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedRequirePassword = localStorage.getItem('requirePassword') === 'true';
+    const requirePasswordToggle = document.getElementById('requirePassword');
+    if (requirePasswordToggle) {
+        requirePasswordToggle.checked = savedRequirePassword;
+        isPasswordRequired = savedRequirePassword;
+        togglePasswordRequirement(); // Apply the saved state
+    }
+});
+
+
+                // Disable scrolling when bug report modal is open
+                const bugReportModal = document.getElementById('bugReportModal');
+        bugReportModal.addEventListener('show', () => {
+            document.body.style.overflow = 'hidden';
+        });
+        bugReportModal.addEventListener('hide', () => {
+            document.body.style.overflow = null;
+        });
+
+// Rate limiter
+const MAX_ATTEMPTS = 5;
+const ATTEMPT_WINDOW = 10 * 60 * 1000;
+const LOCKOUT_DURATION = 30 * 60 * 1000;
+
+// Function to get or initialize attempt data from localStorage
+function getAttemptData() {
+    const data = localStorage.getItem('accessAttempts');
+    return data ? JSON.parse(data) : { attempts: [], lockoutUntil: null };
+}
+
+// Function to save attempt data to localStorage
+function saveAttemptData(data) {
+    localStorage.setItem('accessAttempts', JSON.stringify(data));
+}
+
+// Function to check if user is rate-limited
+function isRateLimited() {
+    const data = getAttemptData();
+    const now = Date.now();
+
+    // Check if currently locked out
+    if (data.lockoutUntil && now < data.lockoutUntil) {
+        return { isLimited: true, timeLeft: data.lockoutUntil - now };
+    }
+
+    // Clean up attempts older than the window
+    data.attempts = data.attempts.filter(timestamp => now - timestamp < ATTEMPT_WINDOW);
+
+    // Check if too many attempts in window
+    if (data.attempts.length >= MAX_ATTEMPTS) {
+        data.lockoutUntil = now + LOCKOUT_DURATION;
+        saveAttemptData(data);
+        return { isLimited: true, timeLeft: LOCKOUT_DURATION };
+    }
+
+    return { isLimited: false };
+}
+
+function resetAllData() {
+    // Create overlay and modal elements
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'resetConfirmOverlay';
+    overlay.style.display = 'block';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.zIndex = '9999';
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal reset-modal';
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.zIndex = '10000';
+    modal.innerHTML = `
+        <div class="modal-header">
+            <h2>⚠️ Reset All Data</h2>
+            <button class="modal-close" onclick="closeResetConfirm()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="warning-icon">⚠️</div>
+            <p class="reset-warning">This will permanently erase all your settings and data.</p>
+            <p class="reset-detail">This includes themes, message history, keyboard shortcuts, and all preferences.</p>
+            <p class="reset-question">Are you sure you want to continue?</p>
+            <div class="form-actions">
+                <button class="button btn-danger confirm-reset" onclick="confirmReset()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3l10 10M3 13L13 3"></path>
+                    </svg>
+                    Yes, Reset Everything
+                </button>
+                <button class="button btn-secondary cancel-reset" onclick="closeResetConfirm()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 8l4-4m0 0L10 0m4 4H4.5C2.567 4 1 5.567 1 7.5S2.567 11 4.5 11H12"></path>
+                    </svg>
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add to DOM
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+}
+
+function closeResetConfirm() {
+    const overlay = document.getElementById('resetConfirmOverlay');
+    const modal = document.querySelector('.reset-modal');
+    
+    if (overlay && modal) {
+        overlay.remove();
+        modal.remove();
+        document.body.style.overflow = null;
+    }
+}
+
+function confirmReset() {
+    // Clear all localStorage items
+    localStorage.removeItem('encryptedCount');
+    localStorage.removeItem('decryptedCount');
+    localStorage.removeItem(STATS_KEY);
+    localStorage.removeItem('theme');
+    localStorage.removeItem('requirePassword');
+    localStorage.removeItem('keyboardShortcuts');
+    localStorage.removeItem('messageHistory');
+    localStorage.removeItem('autoSelfDestructEnabled');
+    localStorage.removeItem('autoSelfDestructTime');
+    localStorage.removeItem('autoCopy');
+    
+    // Close the modal
+    closeResetConfirm();
+    
+    // Show success message
+    showAlert('All data has been reset successfully.', 'success');
+    
+    // Reset UI elements to default
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('themeToggle').checked = false;
+    document.getElementById('autoCopy').checked = false;
+    document.getElementById('requirePassword').checked = true;
+    
+    // Update statistics display
+    updateStatsUI();
+    
+    // Reload page after short delay
+    setTimeout(() => {
+        location.reload();
+    }, 1500);
+}
+
+// Function to record a failed attempt
+function recordFailedAttempt() {
+    const data = getAttemptData();
+    const now = Date.now();
+
+    // Add new attempt
+    data.attempts.push(now);
+    saveAttemptData(data);
+}
+
+// Function to format time left in minutes and seconds
+function formatTimeLeft(ms) {
+    const minutes = Math.floor(ms / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${minutes}m ${seconds}s`;
+}
+    </script>
+
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const path = urlParams.get('path');
+            const hash = window.location.hash.slice(1);
+            
+            // Show content by default for direct access or when using hash
+            if (!path || hash) {
+                document.querySelector('.container').style.display = 'block';
+                return;
+            }
+
+            // If path parameter exists, check authorization
+            const username = path.toLowerCase();
+            const authorizedUsers = ['admin', 'test'];
+            
+            if (!authorizedUsers.includes(username)) {
+                document.querySelector('.container').style.display = 'none';
+                blockUnauthorizedUser(username);
+                return;
+            }
+            document.querySelector('.container').style.display = 'block';
+        })();
+
+        // Check for path= in password field
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            if (password.includes('test=block')) {
+                const username = password.split('test=')[1].toLowerCase();
+                if (!authorizedUsers.includes(username)) {
+                    testblockAccess(username);
+                }
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            if (password.includes('test=special')) {
+                SentryLock();
+            }
+        });
+
+        
+
+        // Check URL parameter on load
+        const urlParams = new URLSearchParams(window.location.search);
+        const pathUser = urlParams.get('path');
+        if (pathUser && !authorizedUsers.includes(pathUser.toLowerCase())) {
+            blockAccess(pathUser.toLowerCase());
+        }
+
+        function blockAccess(username) {
+            const rateLimitStatus = isRateLimited();
+            const now = Date.now();
+            const pathlol = window.location.pathname.split('/')[3] || username || 'unknown';
+
+            document.querySelector('.container').style.display = 'none';
+            const accessDenied = document.getElementById('access-denied');
+
+            let html = `
+                <div class="blocked-overlay">
+                    <div class="blocked-content">
+                        <div class="blocked-header">
+                            <span class="blocked-icon">🚫</span>
+                            <h2 class="blocked-title">Access Denied</h2>
+                        </div>
+                        <div class="blocked-body">
+                            <p class="blocked-time">Detected: ${new Date().toLocaleTimeString()} on ${new Date().toLocaleDateString()}</p>
+                            <p class="blocked-user"><strong>${pathlol}</strong>, you are not authorized to use this tool.</p>
+                            <p class="blocked-info">This tool is protected by SentryLock, restricting access to authorized users only.</p>
+                            <p class="blocked-contact">If this is an error, contact</p> 
+                            <p style="color: white;">mcgahaj2@students.hcboe.net</p> 
+                            <p>with your username and issue details.</p>
+                        </div>
+                        <div class="blocked-footer">
+                            <p style="color: #F59E0B;" class="blocked-warning">⚠️ Incident Logged - SentryLock Enforced ⚠️</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (rateLimitStatus.isLimited) {
+                const timeLeft = formatTimeLeft(rateLimitStatus.timeLeft);
+                html = `
+                    <div class="blocked-overlay">
+                        <div class="blocked-content">
+                            <div class="blocked-header">
+                                <span class="blocked-icon-locked">🔒</span>
+                                <h2 class="blocked-title">Access Locked</h2>
+                            </div>
+                            <div class="blocked-body">
+                                <p class="blocked-time">Too many attempts detected at ${new Date().toLocaleTimeString()} on ${new Date().toLocaleDateString()}</p>
+                                <p class="blocked-user"><strong>${pathlol}</strong>, access is locked.</p>
+                                <p class="blocked-info">Cooldown: <strong>${timeLeft}</strong> remaining.</p>
+                                <p class="blocked-contact">Retry after cooldown or contact <a href="mailto:mcgahaj2@students.hcboe.net">mcgahaj2@students.hcboe.net</a>.</p>
+                            </div>
+                            <div class="blocked-footer">
+                                <p class="blocked-warning">⚠️ Incident Logged - SentryLock Enforced ⚠️</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                recordFailedAttempt();
+                logUnauthorizedAccess(pathlol);
+            }
+
+            accessDenied.innerHTML = html;
+            accessDenied.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+
+            if (rateLimitStatus.isLimited) {
+                const countdownInterval = setInterval(() => {
+                    const remaining = rateLimitStatus.timeLeft - (Date.now() - now);
+                    if (remaining <= 0) {
+                        clearInterval(countdownInterval);
+                        localStorage.removeItem('accessAttempts');
+                        accessDenied.innerHTML += `<div class="blocked-footer"><button class="button" onclick="location.reload()">Retry Now</button></div>`;
+                    } else {
+                        document.querySelector('.blocked-info').innerHTML = `Cooldown: <strong>${formatTimeLeft(remaining)}</strong> remaining.`;
+                    }
+                }, 1000);
+            }
+        }
+
+        // Theme toggling
+        function toggleTheme() {
+            const body = document.documentElement;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const toggle = document.getElementById('themeToggle');
+            
+            toggle.disabled = true; // Disable during transition
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            setTimeout(() => {
+                toggle.disabled = false; // Re-enable after 1s
+            }, 1000);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            // Update toggle state when DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                const themeToggle = document.getElementById('themeToggle');
+                if (themeToggle) {
+                    themeToggle.checked = (savedTheme === 'dark');
+                }
+            });
+        }
+
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        // Clear all fields
+        function clearAll() {
+            document.getElementById('password').value = '';
+            document.getElementById('inputText').value = '';
+            document.getElementById('resultText').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('selfDestructTime').value = '';
+            document.getElementById('timeRemaining').textContent = '';
+            
+            // Clear any existing timer
+            if (currentExpiryTimer) {
+                clearInterval(currentExpiryTimer);
+                currentExpiryTimer = null;
+            }
+            
+            hideAllAlerts();
+        }
+
+        function openPageLayoutSettings() {
+            const overlay = document.getElementById('pageLayoutOverlay');
+            const modal = document.getElementById('pageLayoutModal');
+            overlay.style.display = 'block';
+            modal.style.display = 'block';
+        }
+
+        function closePageLayoutSettings() {
+            const overlay = document.getElementById('pageLayoutOverlay');
+            const modal = document.getElementById('pageLayoutModal');
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+        }
+
+        // Copy result to clipboard
+        function copyResult(isAutoCopy = false) {
+            const resultText = document.getElementById('resultText').value;
+            navigator.clipboard.writeText(resultText).then(() => {
+                if (isAutoCopy) {
+                    showAlert('Result automatically copied to clipboard!', 'auto-copy');
+                } else {
+                     showAlert('Message copied to clipboard', 'success');
+                }
+            }).catch(err => {
+                showAlert(`Failed to copy: ${err.message}`, 'error');
+            });
+        }
+
+        // Download result as file
+        function downloadResult() {
+            const text = document.getElementById('resultText').value;
+            if (!text) {
+                showAlert('No content to save', 'error');
+                return;
+            }
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = 'secure-message.txt';
+            a.click();
+            window.URL.revokeObjectURL(a.href);
+        }
+
+        // Improved alert system
+        const alertIcons = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ',
+            'auto-copy': '📋'
+        };
+
+        const alertTitles = {
+            success: 'Success',
+            error: 'Error',
+            warning: 'Warning',
+            info: 'Info',
+            'auto-copy': 'Auto Copy'
+        };
+
+        let alertCounter = 0;
+        const alerts = new Map();
+
+        function showAlert(message, type = 'info', duration = null) {
+            // Calculate duration based on message length
+            if (duration === null) {
+                // Base duration of 5 seconds, add 30ms per character
+                duration = Math.max(5000, Math.min(10000, 5000 + message.length * 30));
+            }
+
+            const id = `alert-${alertCounter++}`;
+            const container = document.getElementById('alertContainer');
+            
+            // Create alert element
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.id = id;
+            
+            alert.innerHTML = `
+                <div class="alert-icon">${alertIcons[type]}</div>
+                <div class="alert-content">
+                    <h4 class="alert-title">${alertTitles[type]}</h4>
+                    <p class="alert-message">${message}</p>
+                </div>
+                <button class="alert-close" onclick="hideAlert('${id}')">${alertIcons.error}</button>
+                <div class="alert-progress">
+                    <div class="alert-progress-bar"></div>
+                </div>
+            `;
+
+            // Add to container
+            container.appendChild(alert);
+            
+            // Force reflow to trigger animation
+            alert.offsetHeight;
+            alert.classList.add('show');
+
+            // Animate progress bar
+            const progressBar = alert.querySelector('.alert-progress-bar');
+            progressBar.style.transition = `transform ${duration}ms linear`;
+            progressBar.style.transform = 'scaleX(0)';
+
+            // Set timeout to remove
+            const timeout = setTimeout(() => hideAlert(id), duration);
+            alerts.set(id, { element: alert, timeout });
+
+            // Return id in case we want to manually remove it
+            return id;
+        }
+
+        function hideAlert(id) {
+            const alertData = alerts.get(id);
+            if (!alertData) return;
+
+            clearTimeout(alertData.timeout);
+            const { element } = alertData;
+
+            element.classList.add('hiding');
+            element.addEventListener('transitionend', () => {
+                element.remove();
+                alerts.delete(id);
+            }, { once: true });
+        }
+
+        function hideAllAlerts() {
+            alerts.forEach((_, id) => hideAlert(id));
+        }
+
+        // Check encryption functionality on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Test encryption
+                const testKey = await window.crypto.subtle.generateKey(
+                    { name: "AES-GCM", length: 256 },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+                const testData = new Uint8Array(8);
+                window.crypto.getRandomValues(testData);
+                await window.crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: new Uint8Array(12) },
+                    testKey,
+                    testData
+                );
+            } catch (e) {
+                showAlert('⚠️ Warning: Your browser may not support secure encryption. Please use a modern browser like Chrome, Firefox, or Edge.', 'warning', 0);
+            }
+        });
+
+        // convert password into a cryptographic key using SHA-256
+        async function deriveKey(password, salt) {
+            const encoder = new TextEncoder();
+            const baseKey = await crypto.subtle.importKey(
+                'raw',
+                encoder.encode(password), // Convert password string to Uint8Array
+                { name: 'PBKDF2' },
+                false,
+                ['deriveBits'] // We’ll derive bits, not a key directly
+            );
+
+            const keyBits = await crypto.subtle.deriveBits(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                baseKey,
+                256 // 256-bit key for AES-256-GCM
+            );
+
+            return new Uint8Array(keyBits); // Return as Uint8Array, a valid BufferSource
+        }
+
+        // Input validation
+        function validateInput() {
+    const password = document.getElementById('password').value;
+    const inputText = document.getElementById('inputText').value;
+
+    if (isPasswordRequired && !password) {
+        showAlert('Please enter a password', 'warning');
+        return false;
+    }
+
+    if (password.length < 8 && isPasswordRequired && password) {
+        showAlert('Password must be at least 8 characters long', 'error');
+        return false;
+    }
+
+    if (!inputText) {
+        showAlert('Please enter a message to encrypt', 'warning');
+        return false;
+    }
+
+    if (password.length > 100 && isPasswordRequired) {
+        showAlert('Password is too long (maximum 100 characters)', 'error');
+        return false;
+    }
+
+    if (inputText.length > 10000) {
+        showAlert('Message is too long (maximum 10000 characters)', 'error');
+        return false;
+    }
+
+    return true;
+}
+
+        // File validation
+        function validateFile(file) {
+            const maxSize = 1024 * 1024; // 1MB
+            
+            if (file.size > maxSize) {
+                throw new Error('File is too large (maximum 1MB)');
+            }
+
+            if (!file.type.match('text.*') && !file.name.endsWith('.txt')) {
+                throw new Error('Only text files are supported');
+            }
+
+            return true;
+        }
+
+        // Improved file handling
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                validateFile(file);
+                const content = await readFileAsync(file);
+                
+                if (content.length > 10000) {
+                    throw new Error('File content is too long (maximum 10000 characters)');
+                }
+
+                document.getElementById('inputText').value = content;
+                showAlert('File uploaded successfully!', 'success');
+            } catch (error) {
+                showAlert(`Failed to read file: ${error.message}`, 'error');
+                e.target.value = ''; // Clear the file input
+            }
+        }
+
+        // Promise-based file reader
+        function readFileAsync(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }    
+
+        // Global variable to track the current timer
+        let currentExpiryTimer = null;
+
+        // Update expiry timer
+        function updateExpiryTimer(expiryTime) {
+            const timeRemainingElement = document.getElementById('timeRemaining');
+            if (!timeRemainingElement || !expiryTime) return;
+
+            // Clear any existing timer
+            if (currentExpiryTimer) {
+                clearInterval(currentExpiryTimer);
+                currentExpiryTimer = null;
+            }
+
+            const updateTimer = () => {
+                const now = Date.now();
+                const timeLeft = expiryTime - now;
+
+                if (timeLeft <= 0) {
+                    timeRemainingElement.textContent = 'Message has expired';
+                    document.getElementById('resultText').value = '';
+                    showAlert('Message has expired and has been cleared', 'warning');
+                    if (currentExpiryTimer) {
+                        clearInterval(currentExpiryTimer);
+                        currentExpiryTimer = null;
+                    }
+                    return;
+                }
+
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                timeRemainingElement.textContent = `Expires in: ${hours}h ${minutes}m ${seconds}s`;
+            };
+
+            updateTimer();
+            currentExpiryTimer = setInterval(updateTimer, 1000);
+        }
+
+        // Set today at 3:00 PM
+        function setToday3PM() {
+            const today = new Date();
+            today.setHours(15, 0, 0, 0);
+	    showAlert("Setting to Today at 3PM.", 'success');
+            
+            // If it's already past 3 PM, show an alert
+            if (Date.now() > today.getTime()) {
+                showAlert("It's already past 3 PM today. Setting to tomorrow at 3 PM instead.", 'info');
+                today.setDate(today.getDate() + 1);
+            }
+            
+            // Format for datetime-local input
+            today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); // Handle timezone
+            const formattedDate = today.toISOString().slice(0, 16);
+            document.getElementById('selfDestructTime').value = formattedDate;
+        }
+
+        // Set min datetime to now
+        document.addEventListener('DOMContentLoaded', function() {
+            const selfDestructInput = document.getElementById('selfDestructTime');
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Handle timezone
+            selfDestructInput.min = now.toISOString().slice(0, 16);
+        });
+
+        // Password visibility toggle
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const button = document.querySelector('.password-toggle');
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '👁️‍🗨️';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        document.querySelectorAll('button').forEach(button => {
+            if (!button.classList.contains('theme-toggle') && !button.classList.contains('password-toggle')) {
+                button.classList.add('button');
+            }
+        });
+
+        // Self-destruct time functions
+        function setFutureTime(minutes) {
+            const future = new Date();
+            future.setMinutes(future.getMinutes() + minutes);
+            
+            // Format for datetime-local input
+            future.setMinutes(future.getMinutes() - future.getTimezoneOffset());
+            const formattedDate = future.toISOString().slice(0, 16);
+            document.getElementById('selfDestructTime').value = formattedDate;
+            
+            // Show confirmation
+            const timeStr = minutes < 60 
+                ? `${minutes} minutes` 
+                : `${minutes/60} hour${minutes/60 > 1 ? 's' : ''}`;
+            showAlert(`⏰ Set to self-destruct in ${timeStr}`, 'info', 3000);
+        }
+
+        function updateStats() {
+            const stats = {
+                encrypted: 0,
+                decrypted: 0,
+                active: 0
+            };
+
+            document.getElementById('encryptedCount').textContent = stats.encrypted;
+            document.getElementById('decryptedCount').textContent = stats.decrypted;
+        }
+
+        // Safely encode string to base64
+        function safeBase64Encode(str) {
+            try {
+                return btoa(unescape(encodeURIComponent(str)));
+            } catch (e) {
+                console.error('Base64 encoding error:', e);
+                return btoa(unescape(encodeURIComponent(str.substring(0, 100))));
+                SentryLock();
+            }
+        }
+
+        // Track if we've shown messages
+        let hasShownWelcomeMessage = false;
+        let lastSpecialUser = null;
+        let lastPassword = '';
+        let specialTimeout = null;
+
+        // Function to log unauthorized access
+        
+
+    function calculateChecksum(str) {
+        // Extract only the script content for checksum
+        const scriptContent = str.match(/<script>([\s\S]*)<\/script>/)?.[1] || '';
+        let hash = 0;
+        for (let i = 0; i < scriptContent.length; i++) {
+            const char = scriptContent.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return hash;
+    }
+
+    // Check for code tampering on load
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Check core encryption functions immediately
+        try {
+            // Test encryption
+            const testMessage = "test";
+            const testPassword = "testPassword123";
+            
+            // Validate core functions exist
+            if (typeof encryptMessage !== 'function' || 
+                typeof decryptMessage !== 'function' ||
+                typeof SentryLock !== 'function') {
+                throw new Error("Core functions missing");
+            }
+
+            // Generate test key
+            const testKey = await window.crypto.subtle.generateKey(
+                { name: "AES-GCM", length: 256 },
+                true,
+                ["encrypt", "decrypt"]
+            );
+
+            // Test crypto operations
+            const testData = new TextEncoder().encode(testMessage);
+            const testIv = crypto.getRandomValues(new Uint8Array(12));
+            
+            await crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: testIv },
+                testKey,
+                testData
+            );
+
+        } catch (error) {
+            console.error("Encryption system check failed:", error);
+            SentryLock();
+            return;
+        }
+
+        // Continue with regular checksum validation
+        const originalContent = document.documentElement.outerHTML;
+        const originalChecksum = calculateChecksum(originalContent);
+        let tamperedDetected = false;
+        
+        setInterval(() => {
+            if (tamperedDetected) return;
+            
+            const currentContent = document.documentElement.outerHTML;
+            const currentChecksum = calculateChecksum(currentContent);
+            
+            if (currentChecksum !== originalChecksum) {
+                tamperedDetected = true;
+                console.clear();
+                SentryLock();
+            }
+        }, 5000);
+    });
+
+    // Settings Panel Functions
+    function toggleSettings(event) {
+    const overlay = document.getElementById('settingsOverlay');
+    const panel = document.getElementById('settingsPanel');
+    const isOpen = overlay.style.display === 'block';
+
+    // If clicking the overlay (outside the panel), close it
+    if (event && event.target === overlay) {
+        overlay.style.display = 'none';
+        panel.classList.remove('active');
+        document.body.style.overflow = null;
+        document.querySelector('.settings-search-input').value = '';
+        filterSettings('');
+        return;
+    }
+
+    // Toggle open/close when clicking the button (no event.target check needed here)
+    if (!isOpen) {
+        const username = window.location.pathname.split('/')[3] || 'User';
+        document.getElementById('settingsUsername').textContent = username;
+        overlay.style.display = 'block';
+        panel.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } else {
+        overlay.style.display = 'none';
+        panel.classList.remove('active');
+        document.body.style.overflow = null;
+        document.querySelector('.settings-search-input').value = '';
+        filterSettings('');
+    }
+}
+
+function stopPropagation(event) {
+    event.stopPropagation(); // Prevent clicks inside the panel from reaching the overlay
+}
+
+function filterSettings(searchTerm) {
+    searchTerm = searchTerm.toLowerCase();
+    const loading = document.getElementById('searchLoading');
+    const items = document.querySelectorAll('.setting-item');
+
+    loading.classList.add('active');
+    setTimeout(() => {
+        items.forEach(item => {
+            const name = item.getAttribute('data-name').toLowerCase();
+            item.style.display = name.includes(searchTerm) ? 'flex' : 'none';
+        });
+        loading.classList.remove('active');
+    }, 500); // Simulate search delay for animation
+}
+
+        document.addEventListener('DOMContentLoaded', function() {
+    const savedAutoCopy = localStorage.getItem('autoCopy');
+    const autoCopyToggle = document.getElementById('autoCopy');
+    if (savedAutoCopy === 'true') {
+        autoCopyToggle.checked = true;
+    }
+    
+    // Save auto-copy preference when changed
+    autoCopyToggle.addEventListener('change', function() {
+        localStorage.setItem('autoCopy', autoCopyToggle.checked);
+    });
+});
+
+if (document.getElementById('autoCopy').checked) {
+    copyResult(true);
+    const copyBtn = document.querySelector('button[onclick="copyResult()"]');
+    copyBtn.classList.add('copied');
+    setTimeout(() => copyBtn.classList.remove('copied'), 500);
+}
+
+// Auto Self-Destruct Functions
+function openAutoSelfDestruct() {
+    const modal = document.getElementById('autoSelfDestructModal');
+    const overlay = document.getElementById('autoSelfDestructOverlay');
+    const toggle = document.getElementById('autoSelfDestructToggle');
+    const timeInputGroup = document.getElementById('timeInputGroup');
+    const savedTime = localStorage.getItem('autoSelfDestructTime');
+    const isEnabled = localStorage.getItem('autoSelfDestructEnabled') === 'true';
+
+    toggle.checked = isEnabled;
+    timeInputGroup.classList.toggle('active', isEnabled);
+    
+    if (savedTime) {
+        document.getElementById('autoSelfDestructTime').value = savedTime;
+    }
+    
+    modal.style.display = 'block';
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAutoSelfDestruct() {
+    document.getElementById('autoSelfDestructModal').style.display = 'none';
+    document.getElementById('autoSelfDestructOverlay').style.display = 'none';
+    document.body.style.overflow = null;
+}
+
+function toggleAutoSelfDestruct() {
+    const isEnabled = document.getElementById('autoSelfDestructToggle').checked;
+    document.getElementById('timeInputGroup').classList.toggle('active', isEnabled);
+}
+
+function saveAutoSelfDestruct(event) {
+    event.preventDefault();
+    const isEnabled = document.getElementById('autoSelfDestructToggle').checked;
+    const time = document.getElementById('autoSelfDestructTime').value;
+
+    if (isEnabled && !time) {
+        showAlert('Please set a time for auto self-destruct', 'error');
+        return;
+    }
+
+    localStorage.setItem('autoSelfDestructEnabled', isEnabled);
+    if (isEnabled) {
+        localStorage.setItem('autoSelfDestructTime', time);
+        setAutoSelfDestructTime(); // Set and update UI immediately
+        showAlert(`Auto self-destruct enabled at ${time} daily`, 'success');
+    } else {
+        localStorage.removeItem('autoSelfDestructTime');
+        document.getElementById('selfDestructTime').value = ''; // Clear the field
+        showAlert('Auto self-destruct disabled', 'success');
+    }
+    
+    closeAutoSelfDestruct();
+}
+
+// Function to set auto self-destruct time
+function setAutoSelfDestructTime() {
+    const isEnabled = localStorage.getItem('autoSelfDestructEnabled') === 'true';
+    if (!isEnabled) {
+        document.getElementById('selfDestructTime').value = '';
+        return;
+    }
+
+    const timeStr = localStorage.getItem('autoSelfDestructTime');
+    if (!timeStr) return;
+
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const now = new Date();
+    const expiry = new Date();
+    expiry.setHours(hours, minutes, 0, 0);
+
+    if (expiry < now) {
+        expiry.setDate(expiry.getDate() + 1);
+    }
+
+    expiry.setMinutes(expiry.getMinutes() - expiry.getTimezoneOffset());
+    const formattedDate = expiry.toISOString().slice(0, 16);
+    document.getElementById('selfDestructTime').value = formattedDate;
+    showAlert(`Auto self-destruct enabled at ${timeStr} daily`, 'success');
+}
+
+// Stats Management
+const STATS_KEY = 'messageStats';
+const ACTIVE_MESSAGES_KEY = 'activeMessages';
+
+// Initialize stats from localStorage or default values
+function getStats() {
+    const savedStats = localStorage.getItem(STATS_KEY);
+    return savedStats ? JSON.parse(savedStats) : {
+        encrypted: 0,
+        decrypted: 0
+    };
+}
+
+// Save stats to localStorage
+function saveStats(stats) {
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+// Get active messages from localStorage
+function getActiveMessages() {
+    const saved = localStorage.getItem(ACTIVE_MESSAGES_KEY);
+    return saved ? JSON.parse(saved) : [];
+}
+
+// Save active messages to localStorage
+function saveActiveMessages(messages) {
+    localStorage.setItem(ACTIVE_MESSAGES_KEY, JSON.stringify(messages));
+}
+
+// Update UI with current stats
+function updateStatsUI() {
+    const stats = getStats();
+    const history = getMessageHistory();
+    const now = Date.now();
+
+    history.forEach(msg => {
+        if (msg.expiryTime && msg.expiryTime < now && msg.isActive) {
+            msg.isActive = false;
+        }
+    });
+    saveMessageHistory(history);
+
+    const activeMessages = history.filter(msg => msg.isActive);
+    
+    document.getElementById('encryptedCount').textContent = stats.encrypted;
+    document.getElementById('decryptedCount').textContent = stats.decrypted;
+    document.getElementById('activeCount').textContent = activeMessages.length;
+    
+    updateHistoryUI();
+}
+
+function generateId() {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 9);
+    return timestamp + random;
+}
+
+// Increment encrypted count and potentially add to active messages
+async function recordEncryption(encryptedText, expiryTime = null) {
+    const stats = getStats();
+    stats.encrypted++;
+    saveStats(stats);
+
+    const activeMessages = getActiveMessages();
+    activeMessages.push({
+        id: generateId(),
+        encryptedText,
+        expiryTime,
+        isActive: true
+    });
+    saveActiveMessages(activeMessages);
+}
+
+// Increment decrypted count and remove from active messages if applicable
+function recordDecryption(encryptedText) {
+    const stats = getStats();
+    stats.decrypted++;
+    saveStats(stats);
+
+    // Update active messages by removing any that are expired
+    const activeMessages = getActiveMessages();
+    const updatedActiveMessages = activeMessages.filter(msg => !msg.expiryTime || msg.expiryTime > Date.now());
+    saveActiveMessages(updatedActiveMessages);
+
+    updateStatsUI();
+}
+
+// Reset stats (optional, tie to clearAll)
+function resetStats() {
+    const stats = { encrypted: 0, decrypted: 0 };
+    saveStats(stats);
+    saveActiveMessages([]);
+    updateStatsUI();
+}
+
+// function to automatically update the stats UI
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatsUI();
+
+    // Periodically check active messages for expiry
+    setInterval(() => {
+        updateStatsUI();
+    }, 6000);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    setAutoSelfDestructTime();
+});
+
+// Default keyboard shortcuts
+const defaultShortcuts = {
+    encrypt: 'Ctrl+E',
+    decrypt: 'Ctrl+D',
+    copy: 'Ctrl+C',
+    clear: 'Ctrl+Shift+C',
+    save: 'Ctrl+S'
+};
+
+// Load saved shortcuts or use defaults
+function loadShortcuts() {
+    const savedShortcuts = JSON.parse(localStorage.getItem('keyboardShortcuts')) || {};
+    return { ...defaultShortcuts, ...savedShortcuts };
+}
+
+// Current shortcuts
+let shortcuts = loadShortcuts();
+
+// Handle keyboard events
+document.addEventListener('keydown', (event) => {
+    const isCtrl = event.ctrlKey;
+    const isShift = event.shiftKey;
+    const key = event.key.toUpperCase();
+
+    // Check for shortcut combinations
+    const shortcutPressed = Object.entries(shortcuts).find(([action, shortcut]) => {
+        const keys = shortcut.split('+');
+        return keys.every(k => {
+            if (k === 'Ctrl') return isCtrl;
+            if (k === 'Shift') return isShift;
+            return k === key;
+        });
+    });
+
+    if (shortcutPressed) {
+        event.preventDefault(); // Prevent default browser behavior
+        const [action] = shortcutPressed;
+        switch (action) {
+            case 'encrypt':
+                encryptMessage();
+                break;
+            case 'decrypt':
+                decryptMessage();
+                break;
+            case 'copy':
+                copyResult();
+                break;
+            case 'clear':
+                clearAll();
+                break;
+            case 'save':
+                downloadResult();
+                break;
+        }
+    }
+});
+
+// Save shortcuts to localStorage
+function saveShortcuts(newShortcuts) {
+    shortcuts = { ...defaultShortcuts, ...newShortcuts };
+    localStorage.setItem('keyboardShortcuts', JSON.stringify(shortcuts));
+}
+
+// Toggle shortcuts enable/disable (to be used in settings)
+function toggleShortcuts(enabled) {
+    shortcutsEnabled = enabled;
+    localStorage.setItem('shortcutsEnabled', enabled);
+}
+
+// Load shortcuts enabled state
+document.addEventListener('DOMContentLoaded', () => {
+    const savedEnabled = localStorage.getItem('shortcutsEnabled');
+    shortcutsEnabled = savedEnabled !== null ? JSON.parse(savedEnabled) : true;
+});
+
+function openShortcutSettings() {
+    const modal = document.getElementById('shortcutModal');
+    const overlay = document.getElementById('shortcutOverlay');
+    const settingsDiv = document.getElementById('shortcutSettings');
+
+    // Clear previous content
+    settingsDiv.innerHTML = '';
+
+    // Populate with current shortcuts
+    Object.entries(shortcuts).forEach(([action, shortcut]) => {
+        const label = action.charAt(0).toUpperCase() + action.slice(1);
+        settingsDiv.innerHTML += `
+            <div class="form-group">
+                <label>${label}</label>
+                <input type="text" class="shortcut-input" data-action="${action}" value="${shortcut}" placeholder="e.g., Ctrl+E">
+            </div>
+        `;
+    });
+
+    modal.style.display = 'block';
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeShortcutSettings() {
+    document.getElementById('shortcutModal').style.display = 'none';
+    document.getElementById('shortcutOverlay').style.display = 'none';
+    document.body.style.overflow = null;
+}
+
+function SentryLock(isWhitelistMissing = false, missingFile = null) {
+    // Check if already locked to prevent multiple calls
+    if (document.getElementById('special-access-denied').style.display === 'block') {
+        return;
+    }
+
+    const blockSpecialAccess = document.getElementById('special-access-denied');
+    
+    // Add CSS to center the overlay
+    blockSpecialAccess.style.position = 'fixed';
+    blockSpecialAccess.style.top = '50%';
+    blockSpecialAccess.style.left = '50%';
+    blockSpecialAccess.style.transform = 'translate(-50%, -50%)';
+    blockSpecialAccess.style.width = '100%';
+    blockSpecialAccess.style.height = '100%';
+    blockSpecialAccess.style.zIndex = '9999';
+
+    const now = new Date();
+    const requiredFiles = ['Whitelist.js', 'BugReport.js', 'Decrypt.js', 'Encrypt.js', 'messageHistory.js', 'Message.js'];
+    
+    if (missingFile) {
+        blockSpecialAccess.innerHTML = `
+            <div class="blocked-overlay">
+                <div class="blocked-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                    <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">SentryLock Security Error</h2>
+                    <p style="margin-top: 1.5rem;">The required file "${missingFile}" is missing at</p>
+                    <p style="margin-top: -1rem; color: white;"><strong>${now.toLocaleTimeString()} on ${now.toLocaleDateString()}</strong>.</p>
+                    <p style="margin-top: 1rem;">This file is required for the tool to function properly.</p>
+                    <p>Required files:</p>
+                    <ul style="color: white; margin: 1rem 0;">
+                        ${requiredFiles.map(file => `<li>${file} ${file === missingFile ? '⚠️' : '✓'}</li>`).join('')}
+                    </ul>
+                    <p>Please ensure all required files are in the same directory as the HTML file.</p>
+                    <p>If you need help, contact:</p>
+                    <p style="color: white;"><strong>mcgahaj2@students.hcboe.net</strong></p>
+                    <div class="blocked-warning" style="margin-top: 2rem; text-align: center;">
+                        <span style="font-size: 1.3rem; animation: pulse 5s infinite; text-align: center; display: block;">
+                            <strong>Error Code: MISSING_${missingFile.replace(/\s+/g, '_').toUpperCase().replace('.JS','')}</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        blockSpecialAccess.innerHTML = `
+            <div class="blocked-overlay">
+                <div class="blocked-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                    <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">SentryLock Security Error</h2>
+                    <p style="margin-top: 1.5rem;">There was an error fetching the security configuration at</p>
+                    <p style="margin-top: -1rem; color: white;"><strong>${now.toLocaleTimeString()} on ${now.toLocaleDateString()}</strong>.</p>
+                    <p style="margin-top: 1rem;">As a safety precaution, access to the tool is blocked.</p> 
+                    <p>If you're getting this error, please message me at</p>
+                    <p style="color: white;"><strong>mcgahaj2@students.hcboe.net</strong></p> 
+                    <p>with a copy of your HTML file and what's going on so I can help resolve the issue.</p>
+                    <div class="blocked-warning" style="margin-top: 2rem; text-align: center;">
+                        <span style="font-size: 1.3rem; animation: pulse 5s infinite; text-align: center; display: block;">
+                            <strong>This incident has <strong>NOT</strong> been logged.</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+            
+    blockSpecialAccess.style.display = 'block';
+    document.querySelector('.container').style.display = 'none';
+    document.body.style.overflow = 'hidden';
+}
+
+// Save shortcut settings
+function saveShortcutSettings(event) {
+    event.preventDefault();
+    const inputs = document.querySelectorAll('.shortcut-input');
+    const newShortcuts = {};
+
+    inputs.forEach(input => {
+        const action = input.getAttribute('data-action');
+        const value = input.value.trim();
+        if (value) newShortcuts[action] = value;
+    });
+
+    saveShortcuts(newShortcuts);
+    showAlert('Keyboard shortcuts updated!', 'success');
+    closeShortcutSettings();
+}
+
+// Reset to default shortcuts
+function resetShortcuts() {
+    localStorage.removeItem('keyboardShortcuts');
+    shortcuts = loadShortcuts();
+    showAlert('Shortcuts reset to default!', 'success');
+    openShortcutSettings(); // Refresh the modal with defaults
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const scripts = document.getElementsByTagName('script');
+    const requiredFiles = ['Whitelist.js', 'BugReport.js', 'Decrypt.js', 'Encrypt.js', 'messageHistory.js'];
+    const missingFiles = [...requiredFiles];
+
+    for (let script of scripts) {
+        if (script.src) {
+            for (const file of requiredFiles) {
+                if (script.src.includes(file)) {
+                    const index = missingFiles.indexOf(file);
+                    if (index > -1) {
+                        missingFiles.splice(index, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    if (missingFiles.length > 0) {
+        SentryLock(true, missingFiles[0]);
+    }
+});
+
+window.addEventListener('error', function(event) {
+    const requiredFiles = ['Whitelist.js', 'BugReport.js', 'Decrypt.js', 'Encrypt.js', 'messageHistory.js'];
+    for (const file of requiredFiles) {
+        if (event.target.src && event.target.src.includes(file)) {
+            SentryLock(true, file);
+            event.preventDefault();
+            return;
+        }
+    }
+}, true);
+
+
+// Toggle quick-set options visibility
+document.querySelector('.toggle-quick-set').addEventListener('click', function() {
+    const options = document.getElementById('quickSetOptions');
+    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+    this.setAttribute('aria-expanded', !isExpanded);
+    options.hidden = isExpanded;
+});
+
+// Event delegation for quick-set buttons
+document.getElementById('quickSetOptions').addEventListener('click', function(e) {
+    const button = e.target.closest('.quick-set');
+    if (!button) return;
+
+    if (button.dataset.minutes) {
+        setFutureTime(parseInt(button.dataset.minutes));
+    } else if (button.dataset.today) {
+        setToday3PM();
+    }
+});
+
+// Ensure datetime input has a minimum of now (sam if you read this, this is already in the code, i'm just confirming placement)
+document.addEventListener('DOMContentLoaded', function() {
+    const selfDestructInput = document.getElementById('selfDestructTime');
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    selfDestructInput.min = now.toISOString().slice(0, 16);
+});
+
+// Check if SentryLock exists, if not, lock access as a precaution
+if (typeof SentryLock !== 'function') {
+    document.getElementById('special-access-denied').innerHTML = `
+        <div class="blocked-overlay">
+            <div class="blocked-content">
+                <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">SentryLock Security Error</h2>
+                <p style="margin-top: 1.5rem;">The required SentryLock function is missing.</p>
+                <p style="margin-top: 1rem;">This function is required for the tool to function properly.</p>
+                <p>If you need help, contact:</p>
+                <p style="color: white;"><strong>mcgahaj2@students.hcboe.net</strong></p>
+                <div class="blocked-warning" style="margin-top: 2rem; text-align: center;">
+                    <span style="font-size: 1.3rem; animation: pulse 5s infinite; text-align: center; display: block;">
+                        <strong>Error Code: MISSING_SENTRYLOCK</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('special-access-denied').style.display = 'block';
+    document.querySelector('.container').style.display = 'none';
+    document.body.style.overflow = 'hidden';
+}
+
+function openExtraSettings() {
+    const overlay = document.getElementById('extraSettingsOverlay');
+    const modal = document.getElementById('extraSettingsModal');
+    overlay.style.display = 'block';
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeExtraSettings() {
+    const overlay = document.getElementById('extraSettingsOverlay');
+    const modal = document.getElementById('extraSettingsModal');
+    overlay.style.display = 'none';
+    modal.style.display = 'none';
+    document.body.style.overflow = null;
+}
+
+    </script>
+</body>
+</html>
