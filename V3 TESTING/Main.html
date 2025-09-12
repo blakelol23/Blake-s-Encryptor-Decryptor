@@ -9,8 +9,13 @@
     <title>Blake's Encryptor/Decryptor V4 Testing Build</title>
     <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@400;700&family=Sedgwick+Ave+Display&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./js/styles.css">
+    <!-- App version for VersionCheck.js to read -->
+    <meta name="app-version" content="3.0.4">
 </head>
 <body>
+    <!-- Version banner placeholder (optional) -->
+    <div id="versionBannerContainer"></div>
+
     <div id="access-denied" style="display: none;">
         <!-- dynamically set in code -->
     </div>
@@ -34,8 +39,11 @@
                 <div class="stat-label">Active Messages</div>
             </div>
         </div>
-        <div class="header"> <!-- why the fuck does the parenthesis have a bullet point -->
-            <h1>Blake's Encryptor/Decryptor V4 Testing Build <li><span style="font-weight: normal; font: normal;">(NOT FOR EVERYONE YET.)</span></li><h1>
+        <div class="header">
+            <h1>
+                Blake's Encryptor/Decryptor V4 Testing Build
+                <span class="subtitle" style="font-weight: normal; font-style: normal; margin-left: 8px;">(NOT FOR EVERYONE YET.)</span>
+            </h1>
         </div>
 
         <div id="alertContainer"></div>
@@ -131,102 +139,193 @@
     </div>
 
 <!-- Settings Button -->
-<button class="settings-button" onclick="toggleSettings()" aria-label="Open settings">
+<button id="settingsBtn" class="settings-button" onclick="toggleSettings()" aria-label="Open settings" aria-haspopup="dialog" aria-expanded="false">
     <span class="settings-icon">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
             <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l-.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l-.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
     </span>
 </button>
 
 <!-- Redesigned Settings Panel -->
-<div class="settings-overlay" id="settingsOverlay">
-    <div class="settings-panel" id="settingsPanel" onclick="stopPropagation(event)">
+<div class="settings-overlay" id="settingsOverlay" aria-hidden="true" onclick="toggleSettings(event)">
+    <div class="settings-panel" id="settingsPanel" data-variant="drawer" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" onclick="stopPropagation(event)" tabindex="-1">
         <div class="settings-header">
-            <h3>Welcome, <span id="settingsUsername"></span></h3>
-            <button class="settings-close" onclick="toggleSettings()">×</button>
+            <div>
+                <h3 id="settingsTitle">Settings • <span id="settingsUsername"></span></h3>
+                <p class="settings-subtitle">Configure appearance, features, and behavior.</p>
+            </div>
+            <button class="settings-close" onclick="toggleSettings()" aria-label="Close settings" title="Close">×</button>
         </div>
         <div class="settings-content">
-            <div class="settings-search">
-                <input type="text" placeholder="Search settings..." class="settings-search-input" oninput="filterSettings(this.value)">
-                <div class="search-loading" id="searchLoading"></div>
+            <div class="settings-tabs" role="tablist" aria-label="Settings Tabs">
+                <button id="tab-general-btn" class="settings-tab" role="tab" aria-selected="true" data-tab="general">✨ General</button>
+                <button id="tab-features-btn" class="settings-tab" role="tab" aria-selected="false" data-tab="features">🧩 Features</button>
+                <button id="tab-shortcuts-btn" class="settings-tab" role="tab" aria-selected="false" data-tab="shortcuts">⌨️ Shortcuts</button>
+                <button id="tab-about-btn" class="settings-tab" role="tab" aria-selected="false" data-tab="about">ℹ️ About</button>
             </div>
-            <div class="settings-list" id="settingsList">
-                <div class="setting-item" data-name="dark mode">
-                    <span>Dark Mode</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item" data-name="auto-copy result">
-                    <span>Auto-Copy Result</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="autoCopy">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item" data-name="auto self-destruct">
-                    <span>Auto Self-Destruct</span>
-                    <button class="settings-btn" onclick="openAutoSelfDestruct()">Configure</button>
-                </div>
-                <div class="setting-item" data-name="Extra Settings">
-                    <span>Extra Settings</span>
-                    <button class="settings-btn" onclick="openExtraSettings()">Open</button>
-                </div>
-                <div class="setting-item" data-name="message history">
-                    <span>Message History</span>
-                    <button class="settings-btn" onclick="openHistory()">View</button>
-                </div>
-                <div class="setting-item" data-name="report bug">
-                    <span>Report Bug</span>
-                    <button class="settings-btn" onclick="reportBug()">Report Issue</button>
-                </div>
-                    <div class="setting-item no-hover" data-name="version" style="justify-content: center; pointer-events: none;">
-                        <span style="user-select: none; pointer-events: none;">Version V3.0.4</span>
+            <div class="settings-quick-actions">
+                <button class="settings-btn" onclick="openHistory()">History</button>
+                <button class="settings-btn" onclick="reportBug()">Report Bug</button>
+                <button class="settings-btn btn-danger" onclick="resetAllData()">Reset</button>
+            </div>
+            <div class="settings-sections">
+                <section id="tab-general" class="settings-section" role="tabpanel" aria-labelledby="tab-general-btn">
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Dark Mode</span>
+                                <small class="setting-desc">Switch between light and dark themes.</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Auto-Copy Result</span>
+                                <small class="setting-desc">Automatically copy output after encrypt/decrypt.</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoCopy">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Require Password</span>
+                                <small class="setting-desc">Force a password to be entered before actions.</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="requirePassword" onchange="togglePasswordRequirement()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Accent Color</span>
+                                <small class="setting-desc">Customize the app accent color.</small>
+                            </div>
+                            <input type="color" id="accentColorPicker" aria-label="Choose accent color" onchange="setAccentColor(this.value)">
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Compact Mode</span>
+                                <small class="setting-desc">Reduce paddings for denser layout.</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="compactModeToggle" onchange="toggleCompactMode()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Reduce Motion</span>
+                                <small class="setting-desc">Disable most animations and transitions.</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="reduceMotionToggle" onchange="toggleReduceMotion()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
                     </div>
-                </div>
+                </section>
+                <section id="tab-features" class="settings-section" role="tabpanel" aria-labelledby="tab-features-btn" hidden>
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Auto Self-Destruct</span>
+                                <small class="setting-desc">Set a daily default expiry for new messages.</small>
+                            </div>
+                            <button class="settings-btn" onclick="openAutoSelfDestruct()">Configure</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Message History</span>
+                                <small class="setting-desc">Review or clear your previous messages.</small>
+                            </div>
+                            <button class="settings-btn" onclick="openHistory()">View</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Reset All Data</span>
+                                <small class="setting-desc">Wipes preferences, history, and stats.</small>
+                            </div>
+                            <button class="settings-btn btn-danger" onclick="resetAllData()">Reset</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Export Settings</span>
+                                <small class="setting-desc">Download your preferences as JSON.</small>
+                            </div>
+                            <button class="settings-btn" onclick="exportSettings()">Export</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Import Settings</span>
+                                <small class="setting-desc">Load preferences from a JSON file.</small>
+                            </div>
+                            <div>
+                                <input id="importSettingsInput" type="file" accept="application/json" style="display:none" onchange="handleImportSettings(event)">
+                                <button class="settings-btn" onclick="document.getElementById('importSettingsInput').click()">Import</button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Backup Message History</span>
+                                <small class="setting-desc">Download your message history as JSON.</small>
+                            </div>
+                            <button class="settings-btn" onclick="backupHistory()">Backup</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Clear Cache</span>
+                                <small class="setting-desc">Clear non-essential cached data.</small>
+                            </div>
+                            <button class="settings-btn btn-danger" onclick="clearCache()">Clear</button>
+                        </div>
+                    </div>
+                </section>
+                <section id="tab-shortcuts" class="settings-section" role="tabpanel" aria-labelledby="tab-shortcuts-btn" hidden>
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Keyboard Shortcuts</span>
+                                <small class="setting-desc">Customize hotkeys for frequent actions.</small>
+                            </div>
+                            <button class="settings-btn" onclick="openShortcutSettings()">Configure</button>
+                        </div>
+                    </div>
+                </section>
+                <section id="tab-about" class="settings-section" role="tabpanel" aria-labelledby="tab-about-btn" hidden>
+                <!-- adds a little space between the two -->
+                    <div class="settings-list">
+                        <div class="setting-item no-hover" style="justify-content: center; pointer-events: none;">
+                            <span style="user-select: none; pointer-events: none;">Version V3.0.4</span>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-text">
+                                <span class="setting-title">Updates</span>
+                                <small class="setting-desc">Check the server for a newer version and show a banner if available.</small>
+                            </div>
+                            <button class="settings-btn" onclick="(function(){try{VersionCheck.setDebug(true);}catch(_){} try{VersionCheck.compareAndNotify();}catch(e){console.warn('[VersionCheck] check failed:', e);}})()">Check for Updates</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-text">
+                            <span class="setting-title">Report Bug</span>
+                            <small class="setting-desc">Found a glitch? Help improve by reporting.</small>
+                        </div>
+                        <button class="settings-btn" onclick="reportBug()">Report Issue</button>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Extra Settings Modal -->
-<div class="modal-overlay" id="extraSettingsOverlay" onclick="closeExtraSettings()"></div>
-<div class="modal" id="extraSettingsModal">
-    <div class="modal-header">
-        <h2>Extra Settings</h2>
-        <button class="modal-close" onclick="closeExtraSettings()">×</button>
-    </div>
-    <div class="modal-body">
-        <div class="settings-list">
-            <div class="setting-item" data-name="layout">
-                <span>Page Layout</span>
-                <!--<button class="settings-btn" onclick="openPageLayoutSettings()">Configure</button>-->
-                <div class="setting-item no-hover" data-name="version" style="justify-content: center; pointer-events: none;">
-                    <span style="user-select: none; pointer-events: none;">Coming V3.1</span>
-                </div>
-            </div>
-            <div class="setting-item" data-name="keyboard shortcuts">
-                <span>Keyboard Shortcuts</span>
-                <button class="settings-btn" onclick="openShortcutSettings()">Configure</button>
-            </div>
-            <div class="setting-item" data-name="require password">
-                <span>Require Password</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="requirePassword" onchange="togglePasswordRequirement()">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="setting-item" data-name="reset data">
-                <span>Reset All Data</span>
-                <button class="settings-btn" onclick="resetAllData()">Reset</button>
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Page Layout Settings Modal (W.I.P) -->
 <div class="modal-overlay" id="pageLayoutOverlay" onclick="closePageLayoutSettings()"></div>
@@ -330,6 +429,20 @@
     <script src="./js/messageHistory.js"></script>
     <script src="./js/Encrypt.js"></script>
     <script src="./js/Decrypt.js"></script>
+    <script src="./js/Settings.js"></script>
+    <script>
+      // Expose version early for VersionCheck.js
+      window.__APP_VERSION__ = '3.0.4';
+    </script>
+    <script src="./js/VersionCheck.js"></script>
+    <script>
+      // Explicitly trigger after load (VersionCheck also auto-runs)
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.VersionCheck && typeof VersionCheck.compareAndNotify === 'function') {
+          VersionCheck.compareAndNotify();
+        }
+      });
+    </script>
 
 <script>
 
@@ -379,7 +492,7 @@ async function onEncryptClick() {
     try {
         await encryptMessage();
         if (window.MessageService && MessageService.createMessage && window.lastMessageMeta) {
-            const endpoint = localStorage.getItem('messageServiceEndpoint') || 'https://script.google.com/macros/s/AKfycbzGQXAyxv-HowUX-Ulf0-ceZvMbVu8c-jvje982xbxtQOn44i0LqunzcTfT8aHbc-J4TQ/exec';
+            const endpoint = localStorage.getItem('messageServiceEndpoint') || 'https://script.google.com/macros/s/AKfycbyNFNmKjtMrzh7wQMDF81jPE_6JuA9LEYRIYeoYCGETkOstm0OWZYSPptv4MmU6JoXN_Q/exec';
             if (endpoint) {
                 MessageService.createMessage(window.lastMessageMeta);
             } else if (typeof sentryLockMS === 'function') {
@@ -395,7 +508,7 @@ async function onDecryptClick() {
     try {
         await decryptMessage();
         if (window.MessageService && MessageService.incrementDecryptionCount && window.lastDecryptedId) {
-            const endpoint = localStorage.getItem('messageServiceEndpoint') || 'https://script.google.com/macros/s/AKfycbzGQXAyxv-HowUX-Ulf0-ceZvMbVu8c-jvje982xbxtQOn44i0LqunzcTfT8aHbc-J4TQ/exec';
+            const endpoint = localStorage.getItem('messageServiceEndpoint') || 'https://script.google.com/macros/s/AKfycbyNFNmKjtMrzh7wQMDF81jPE_6JuA9LEYRIYeoYCGETkOstm0OWZYSPptv4MmU6JoXN_Q/exec';
             if (endpoint) {
                 MessageService.incrementDecryptionCount(window.lastDecryptedId);
             } else if (typeof sentryLockMS === 'function') {
@@ -842,89 +955,262 @@ function formatTimeLeft(ms) {
             window.URL.revokeObjectURL(a.href);
         }
 
-        // Improved alert system
-        const alertIcons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ',
-            'auto-copy': '📋'
-        };
-
-        const alertTitles = {
-            success: 'Success',
-            error: 'Error',
-            warning: 'Warning',
-            info: 'Info',
-            'auto-copy': 'Auto Copy'
-        };
-
+        // Alert system (redesign): queue, actions, pause on hover/blur, swipe-to-dismiss, ARIA
+        const ALERT_MAX_VISIBLE = 3;
+        const alertIcons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ', 'auto-copy': '📋' };
+        const alertTitles = { success: 'Success', error: 'Error', warning: 'Warning', info: 'Info', 'auto-copy': 'Auto Copy' };
         let alertCounter = 0;
-        const alerts = new Map();
+        const activeAlerts = new Map();
+        const alertQueue = [];
 
-        function showAlert(message, type = 'info', duration = null) {
-            // Calculate duration based on message length
-            if (duration === null) {
-                // Base duration of 5 seconds, add 30ms per character
-                duration = Math.max(5000, Math.min(10000, 5000 + message.length * 30));
+        function computeDuration(message, explicit) {
+            if (explicit === 0) return Infinity; // sticky
+            if (typeof explicit === 'number') return explicit;
+            return Math.max(4000, Math.min(9000, 5000 + String(message).length * 25));
+        }
+
+        // Backward-compatible signature: showAlert(message, type?, duration?)
+        // New signature: showAlert({ message, type, duration, actions: [{label, onClick}], dismissible, id })
+        function showAlert(arg1, type = 'info', duration = null) {
+            const isOptions = typeof arg1 === 'object' && arg1 !== null && 'message' in arg1;
+            const opts = isOptions ? arg1 : { message: arg1, type, duration };
+            const kind = opts.type || 'info';
+            const id = opts.id || `alert-${alertCounter++}`;
+            // Choose container: normal vs banner
+            let container = document.getElementById('alertContainer');
+            if (opts.variant === 'banner') {
+                container = document.getElementById('alertBannerContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'alertBannerContainer';
+                    document.body.appendChild(container);
+                }
             }
+            const dur = computeDuration(opts.message, opts.duration);
+            const dismissible = opts.dismissible !== false; // default true
+            const actions = Array.isArray(opts.actions) ? opts.actions.slice(0, 3) : [];
 
-            const id = `alert-${alertCounter++}`;
-            const container = document.getElementById('alertContainer');
-            
-            // Create alert element
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.id = id;
-            
-            alert.innerHTML = `
-                <div class="alert-icon">${alertIcons[type]}</div>
-                <div class="alert-content">
-                    <h4 class="alert-title">${alertTitles[type]}</h4>
-                    <p class="alert-message">${message}</p>
-                </div>
-                <button class="alert-close" onclick="hideAlert('${id}')">${alertIcons.error}</button>
-                <div class="alert-progress">
-                    <div class="alert-progress-bar"></div>
-                </div>
-            `;
+            const makeAlertEl = () => {
+                const el = document.createElement('div');
+                el.className = `alert alert-${kind}${opts.variant === 'banner' ? ' alert--banner' : ''}`;
+                el.id = id;
+                el.setAttribute('role', 'alert');
+                el.setAttribute('aria-live', 'polite');
 
-            // Add to container
-            container.appendChild(alert);
-            
-            // Force reflow to trigger animation
-            alert.offsetHeight;
-            alert.classList.add('show');
+                const actionsHtml = actions.map((a, i) => `<button class="alert-action" data-action-index="${i}">${a.label}</button>`).join('');
+                el.innerHTML = `
+                    <div class="alert-icon">${alertIcons[kind] || ''}</div>
+                    <div class="alert-content">
+                        <h4 class="alert-title">${alertTitles[kind] || 'Notice'}</h4>
+                        <p class="alert-message">${opts.message}</p>
+                        ${actions.length ? `<div class="alert-actions">${actionsHtml}</div>` : ''}
+                    </div>
+                    ${dismissible ? `<button class="alert-close" aria-label="Dismiss" title="Dismiss">${alertIcons.error}</button>` : ''}
+                    <div class="alert-progress"><div class="alert-progress-bar"></div></div>
+                `;
+                return el;
+            };
 
-            // Animate progress bar
-            const progressBar = alert.querySelector('.alert-progress-bar');
-            progressBar.style.transition = `transform ${duration}ms linear`;
-            progressBar.style.transform = 'scaleX(0)';
+            const scheduleDisplay = () => {
+                if (container.children.length >= ALERT_MAX_VISIBLE) {
+                    alertQueue.push({ opts, id });
+                    return;
+                }
 
-            // Set timeout to remove
-            const timeout = setTimeout(() => hideAlert(id), duration);
-            alerts.set(id, { element: alert, timeout });
+                const el = makeAlertEl();
+                container.appendChild(el);
+                // Force reflow and show
+                // eslint-disable-next-line no-unused-expressions
+                el.offsetHeight; el.classList.add('show');
 
-            // Return id in case we want to manually remove it
+                const state = { element: el, remaining: dur, start: Date.now(), timer: null, paused: false, dur };
+                const progressBar = el.querySelector('.alert-progress-bar');
+                if (Number.isFinite(dur)) {
+                    progressBar.style.transition = `transform ${dur}ms linear`;
+                    progressBar.style.transform = 'scaleX(0)';
+                    state.timer = setTimeout(() => hideAlert(id), dur);
+                } else {
+                    el.classList.add('sticky');
+                }
+
+                // Events: close button
+                if (dismissible) {
+                    el.querySelector('.alert-close').addEventListener('click', () => hideAlert(id));
+                    el.classList.add('clickable');
+                    el.addEventListener('click', (e) => {
+                        if (e.target.closest('.alert-action') || e.target.closest('.alert-close')) return;
+                        hideAlert(id);
+                    });
+                }
+
+                // Actions
+                if (actions.length) {
+                    el.querySelectorAll('.alert-action').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const idx = Number(e.currentTarget.getAttribute('data-action-index'));
+                            try { actions[idx]?.onClick?.(); } catch { /* noop */ }
+                            hideAlert(id);
+                        });
+                    });
+                }
+
+                // Pause on hover
+                const pause = () => {
+                    if (state.paused || !Number.isFinite(state.dur)) return;
+                    state.paused = true;
+                    clearTimeout(state.timer);
+                    const elapsed = Date.now() - state.start;
+                    state.remaining = Math.max(0, state.remaining - elapsed);
+                    const fraction = state.remaining / state.dur;
+                    progressBar.style.transition = 'none';
+                    progressBar.style.transform = `scaleX(${isFinite(fraction) ? fraction : 0})`;
+                };
+                const resume = () => {
+                    if (!state.paused || !Number.isFinite(state.dur)) return;
+                    state.paused = false;
+                    state.start = Date.now();
+                    // ensure next frame so transition applies from the current transform
+                    requestAnimationFrame(() => {
+                        progressBar.style.transition = `transform ${state.remaining}ms linear`;
+                        progressBar.style.transform = 'scaleX(0)';
+                        state.timer = setTimeout(() => hideAlert(id), state.remaining);
+                    });
+                };
+                el.addEventListener('mouseenter', pause);
+                el.addEventListener('mouseleave', resume);
+
+                // Pause on window blur, resume on focus
+                const onBlur = () => pause();
+                const onFocus = () => resume();
+                window.addEventListener('blur', onBlur);
+                window.addEventListener('focus', onFocus);
+                state.onBlur = onBlur; state.onFocus = onFocus;
+
+                // Swipe/drag to dismiss
+                let startX = 0; let currentX = 0; let dragging = false;
+                const threshold = 80;
+                const onPointerDown = (e) => { dragging = true; startX = (e.touches?.[0]?.clientX) ?? e.clientX; el.classList.add('dragging'); };
+                const onPointerMove = (e) => {
+                    if (!dragging) return;
+                    currentX = (e.touches?.[0]?.clientX) ?? e.clientX;
+                    const dx = currentX - startX;
+                    el.style.transform = `translateX(${dx}px)`;
+                    el.style.opacity = String(1 - Math.min(0.6, Math.abs(dx) / 200));
+                };
+                const onPointerUp = () => {
+                    if (!dragging) return;
+                    dragging = false;
+                    const dx = currentX - startX;
+                    el.classList.remove('dragging');
+                    el.style.transform = '';
+                    el.style.opacity = '';
+                    if (Math.abs(dx) > threshold) hideAlert(id);
+                };
+                el.addEventListener('mousedown', onPointerDown);
+                el.addEventListener('mousemove', onPointerMove);
+                el.addEventListener('mouseup', onPointerUp);
+                el.addEventListener('touchstart', onPointerDown, { passive: true });
+                el.addEventListener('touchmove', onPointerMove, { passive: true });
+                el.addEventListener('touchend', onPointerUp);
+
+                activeAlerts.set(id, state);
+            };
+
+            scheduleDisplay();
             return id;
         }
 
         function hideAlert(id) {
-            const alertData = alerts.get(id);
-            if (!alertData) return;
-
-            clearTimeout(alertData.timeout);
-            const { element } = alertData;
-
+            const state = activeAlerts.get(id);
+            if (!state) return;
+            clearTimeout(state.timer);
+            const { element } = state;
             element.classList.add('hiding');
             element.addEventListener('transitionend', () => {
                 element.remove();
-                alerts.delete(id);
+                activeAlerts.delete(id);
+                // cleanup global listeners
+                if (state.onBlur) window.removeEventListener('blur', state.onBlur);
+                if (state.onFocus) window.removeEventListener('focus', state.onFocus);
+                // Show next from queue if any
+                const next = alertQueue.shift();
+                if (next) showAlert(next.opts);
             }, { once: true });
         }
 
         function hideAllAlerts() {
-            alerts.forEach((_, id) => hideAlert(id));
+            Array.from(activeAlerts.keys()).forEach(id => hideAlert(id));
+            alertQueue.length = 0;
+        }
+
+        // =========================
+        // Version check banner alert
+        // =========================
+        const CURRENT_VERSION_FALLBACK = '3.0.4';
+
+        function getCurrentAppVersion() {
+            // Try read from About tab text
+            const about = document.querySelector('#tab-about .setting-item span');
+            if (about) {
+                const m = about.textContent.match(/V(\d+\.\d+\.\d+)/i);
+                if (m) return m[1];
+            }
+            return CURRENT_VERSION_FALLBACK;
+        }
+
+        async function fetchRemoteVersion(endpoint) {
+            const url = endpoint;
+            const body = { action: 'getVersion' };
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                mode: 'no-cors' // Apps Script often needs no-cors
+            }).catch(() => null);
+            // With no-cors, we can't read body; fallback to a JSONP-like endpoint not provided.
+            // As a workaround, also try a form-encoded request.
+            if (!resp || (resp && resp.type === 'opaque')) {
+                try {
+                    const form = new URLSearchParams();
+                    form.set('action', 'getVersion');
+                    const r2 = await fetch(url, { method: 'POST', body: form });
+                    const json = await r2.json();
+                    return json;
+                } catch {
+                    return { ok: false, error: 'Fetch blocked' };
+                }
+            }
+            try {
+                const json = await resp.json();
+                return json;
+            } catch {
+                return { ok: false, error: 'Invalid JSON' };
+            }
+        }
+
+        async function checkVersionRemote() {
+            try {
+                const endpoint = localStorage.getItem('messageServiceEndpoint');
+                if (!endpoint) return; // silent if no backend configured
+                const res = await fetchRemoteVersion(endpoint);
+                const current = getCurrentAppVersion();
+                if (res && res.ok && res.version) {
+                    if (String(res.version).trim() !== String(current).trim()) {
+                        const msg = `A new version is available. Your version: v${current}. Latest: v${res.version}.`;
+                        showAlert({
+                            message: msg,
+                            type: 'warning',
+                            duration: 0, // sticky
+                            variant: 'banner',
+                            actions: [
+                                { label: 'Dismiss', onClick: () => {} }
+                            ]
+                        });
+                    }
+                }
+            } catch (e) {
+                // noop
+            }
         }
 
         // Check encryption functionality on page load
@@ -1254,37 +1540,111 @@ function formatTimeLeft(ms) {
         }, 5000);
     });
 
-    // Settings Panel Functions
-    function toggleSettings(event) {
-    const overlay = document.getElementById('settingsOverlay');
-    const panel = document.getElementById('settingsPanel');
-    const isOpen = overlay.style.display === 'block';
+    // Settings Panel Functions (refactored)
+    let settingsPreviousFocus = null;
+    let settingsKeydownHandler = null;
 
-    // If clicking the overlay (outside the panel), close it
-    if (event && event.target === overlay) {
-        overlay.style.display = 'none';
-        panel.classList.remove('active');
-        document.body.style.overflow = null;
-        document.querySelector('.settings-search-input').value = '';
-        filterSettings('');
-        return;
+    function getSettingsFocusable() {
+        const panel = document.getElementById('settingsPanel');
+        return panel.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
     }
 
-    // Toggle open/close when clicking the button (no event.target check needed here)
-    if (!isOpen) {
+    function openSettings() {
+        const overlay = document.getElementById('settingsOverlay');
+        const panel = document.getElementById('settingsPanel');
+        const btn = document.getElementById('settingsBtn');
         const username = window.location.pathname.split('/')[3] || 'User';
         document.getElementById('settingsUsername').textContent = username;
+
+        settingsPreviousFocus = document.activeElement;
+
         overlay.style.display = 'block';
+        overlay.setAttribute('aria-hidden', 'false');
         panel.classList.add('active');
         document.body.style.overflow = 'hidden';
-    } else {
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+
+        // Restore search value from localStorage and apply filter
+        const searchInput = document.getElementById('settingsSearchInput');
+        const saved = localStorage.getItem('settingsSearch') || '';
+        if (searchInput) {
+            searchInput.value = saved;
+            filterSettings(saved);
+        }
+
+        // Focus trap setup
+        const focusables = getSettingsFocusable();
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (searchInput) {
+            panel.focus(); // ensure panel is focusable for screen readers
+            searchInput.focus();
+        } else if (first) {
+            first.focus();
+        }
+
+        settingsKeydownHandler = function(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeSettings();
+                return;
+            }
+            if (e.key === 'Tab' && focusables.length > 0) {
+                // Recompute in case DOM changed
+                const f = getSettingsFocusable();
+                const firstEl = f[0];
+                const lastEl = f[f.length - 1];
+                if (e.shiftKey) {
+                    if (document.activeElement === firstEl) {
+                        e.preventDefault();
+                        lastEl.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastEl) {
+                        e.preventDefault();
+                        firstEl.focus();
+                    }
+                }
+            }
+        };
+        panel.addEventListener('keydown', settingsKeydownHandler);
+    }
+
+    function closeSettings() {
+        const overlay = document.getElementById('settingsOverlay');
+        const panel = document.getElementById('settingsPanel');
+        const btn = document.getElementById('settingsBtn');
         overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
         panel.classList.remove('active');
         document.body.style.overflow = null;
-        document.querySelector('.settings-search-input').value = '';
-        filterSettings('');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+
+        if (settingsKeydownHandler) {
+            panel.removeEventListener('keydown', settingsKeydownHandler);
+            settingsKeydownHandler = null;
+        }
+        if (settingsPreviousFocus && typeof settingsPreviousFocus.focus === 'function') {
+            settingsPreviousFocus.focus();
+        }
     }
-}
+
+    function toggleSettings(event) {
+        const overlay = document.getElementById('settingsOverlay');
+        const isOpen = overlay.style.display === 'block';
+        // Close if clicking on overlay
+        if (event && event.target === overlay) {
+            closeSettings();
+            return;
+        }
+        if (!isOpen) {
+            openSettings();
+        } else {
+            closeSettings();
+        }
+    }
 
 function stopPropagation(event) {
     event.stopPropagation(); // Prevent clicks inside the panel from reaching the overlay
@@ -1303,7 +1663,22 @@ function filterSettings(searchTerm) {
         });
         loading.classList.remove('active');
     }, 500); // Simulate search delay for animation
+    try { localStorage.setItem('settingsSearch', searchTerm); } catch(e) {}
 }
+
+// Global keyboard shortcuts for settings: Ctrl+, to open
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === ',') {
+        e.preventDefault();
+        const overlay = document.getElementById('settingsOverlay');
+        const isOpen = overlay && overlay.style.display === 'block';
+        if (!isOpen) {
+            openSettings();
+        } else {
+            closeSettings();
+        }
+    }
+});
 
         document.addEventListener('DOMContentLoaded', function() {
     const savedAutoCopy = localStorage.getItem('autoCopy');
@@ -1516,6 +1891,160 @@ document.addEventListener('DOMContentLoaded', function() {
     setAutoSelfDestructTime();
 });
 
+// =========================
+// Settings Enhancements
+// =========================
+
+// Apply saved accent color
+function applyAccentColor(color) {
+    if (!color) return;
+    document.documentElement.style.setProperty('--accent-color', color);
+}
+
+function setAccentColor(color) {
+    try {
+        localStorage.setItem('accentColor', color);
+        applyAccentColor(color);
+        showAlert('Accent color updated.', 'success');
+    } catch (e) {
+        console.error('setAccentColor error', e);
+    }
+}
+
+// Compact Mode
+function applyCompactMode(enabled) {
+    document.documentElement.setAttribute('data-compact', enabled ? 'true' : 'false');
+}
+
+function toggleCompactMode() {
+    const enabled = document.getElementById('compactModeToggle').checked;
+    localStorage.setItem('compactMode', JSON.stringify(enabled));
+    applyCompactMode(enabled);
+}
+
+// Reduce Motion
+function applyReduceMotion(enabled) {
+    document.documentElement.setAttribute('data-reduce-motion', enabled ? 'true' : 'false');
+}
+
+function toggleReduceMotion() {
+    const enabled = document.getElementById('reduceMotionToggle').checked;
+    localStorage.setItem('reduceMotion', JSON.stringify(enabled));
+    applyReduceMotion(enabled);
+}
+
+// Export / Import Settings (preferences only)
+function getExportableSettings() {
+    const keys = ['theme','requirePassword','autoCopy','accentColor','compactMode','reduceMotion','keyboardShortcuts'];
+    const obj = {};
+    keys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) obj[k] = v; });
+    return obj;
+}
+
+function exportSettings() {
+    try {
+        const data = JSON.stringify(getExportableSettings(), null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'settings.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showAlert('Settings exported.', 'success');
+    } catch (e) {
+        showAlert('Failed to export settings.', 'error');
+    }
+}
+
+function handleImportSettings(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const data = JSON.parse(reader.result);
+            Object.entries(data).forEach(([k,v]) => localStorage.setItem(k, v));
+            // Re-apply
+            applyAccentColor(localStorage.getItem('accentColor'));
+            applyCompactMode(JSON.parse(localStorage.getItem('compactMode') || 'false'));
+            applyReduceMotion(JSON.parse(localStorage.getItem('reduceMotion') || 'false'));
+            // Theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+            // Toggles UI
+            const compactToggle = document.getElementById('compactModeToggle');
+            if (compactToggle) compactToggle.checked = JSON.parse(localStorage.getItem('compactMode') || 'false');
+            const reduceToggle = document.getElementById('reduceMotionToggle');
+            if (reduceToggle) reduceToggle.checked = JSON.parse(localStorage.getItem('reduceMotion') || 'false');
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) themeToggle.checked = (savedTheme === 'dark');
+            const autoCopyToggle = document.getElementById('autoCopy');
+            if (autoCopyToggle) autoCopyToggle.checked = localStorage.getItem('autoCopy') === 'true';
+            const picker = document.getElementById('accentColorPicker');
+            if (picker && localStorage.getItem('accentColor')) picker.value = localStorage.getItem('accentColor');
+            showAlert('Settings imported.', 'success');
+        } catch (e) {
+            console.error('Import settings error', e);
+            showAlert('Invalid settings file.', 'error');
+        }
+        // reset input so change can trigger again
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+// Backup message history
+function backupHistory() {
+    try {
+        const history = localStorage.getItem('messageHistory') || '[]';
+        const blob = new Blob([history], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'message-history.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showAlert('Message history downloaded.', 'success');
+    } catch (e) {
+        showAlert('Failed to backup history.', 'error');
+    }
+}
+
+// Clear non-essential cached data (keeps preferences and history)
+function clearCache() {
+    const keep = new Set(['theme','requirePassword','autoCopy','accentColor','compactMode','reduceMotion','keyboardShortcuts','messageHistory', STATS_KEY, ACTIVE_MESSAGES_KEY]);
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!keep.has(k)) toRemove.push(k);
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+    showAlert('Cache cleared.', 'success');
+}
+
+// Initialize new settings on load
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Accent
+        const savedAccent = localStorage.getItem('accentColor');
+        if (savedAccent) {
+            applyAccentColor(savedAccent);
+            const picker = document.getElementById('accentColorPicker');
+            if (picker) picker.value = savedAccent;
+        }
+        // Compact Mode
+        const savedCompact = JSON.parse(localStorage.getItem('compactMode') || 'false');
+        applyCompactMode(savedCompact);
+        const compactToggle = document.getElementById('compactModeToggle');
+        if (compactToggle) compactToggle.checked = savedCompact;
+        // Reduce Motion
+        const savedReduce = JSON.parse(localStorage.getItem('reduceMotion') || 'false');
+        applyReduceMotion(savedReduce);
+        const reduceToggle = document.getElementById('reduceMotionToggle');
+        if (reduceToggle) reduceToggle.checked = savedReduce;
+    } catch (e) {
+        console.error('Initialize settings error', e);
+    }
+});
 // Default keyboard shortcuts
 const defaultShortcuts = {
     encrypt: 'Ctrl+E',
@@ -1801,21 +2330,7 @@ if (typeof SentryLock !== 'function') {
     document.body.style.overflow = 'hidden';
 }
 
-function openExtraSettings() {
-    const overlay = document.getElementById('extraSettingsOverlay');
-    const modal = document.getElementById('extraSettingsModal');
-    overlay.style.display = 'block';
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-function closeExtraSettings() {
-    const overlay = document.getElementById('extraSettingsOverlay');
-    const modal = document.getElementById('extraSettingsModal');
-    overlay.style.display = 'none';
-    modal.style.display = 'none';
-    document.body.style.overflow = null;
-}
+ 
 
     </script>
 </body>
