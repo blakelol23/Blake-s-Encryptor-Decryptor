@@ -42,7 +42,6 @@
         <div class="header">
             <h1>
                 Blake's Encryptor/Decryptor V4 Testing Build
-                <span class="subtitle" style="font-weight: normal; font-style: normal; margin-left: 8px;">(NOT FOR EVERYONE YET.)</span>
             </h1>
         </div>
 
@@ -422,7 +421,7 @@
     </div>
 
     <script src="./js/Whitelist.js"></script>
-    <script src="./js/Console.js"></script>
+    <!-- <script src="./js/Console.js"></script> -->
     <script src="./js/config.js"></script>
     <script src="./js/MessageService.js"></script>
     <script src="./js/BugReport.js"></script>  
@@ -519,20 +518,6 @@ async function onDecryptClick() {
         console.error('onDecryptClick error:', e);
     }
 }
-
-function checkVer() {
-    const version = localStorage.getItem('version') || '3.0';
-    if (version !== '3.0.4') {
-        showAlert('Please update to the latest version of Blake\'s Encryptor/Decryptor.', 'warning', 1000000);
-
-        //local script to grab current version from github.
-    }
-}
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    checkVer();
-});
 
 function togglePasswordRequirement() {
     const requirePassword = document.getElementById('requirePassword').checked;
